@@ -1,19 +1,30 @@
 @import './base.css';
 
 #app {
-  max-width: 100vw;
-  min-height: 100vh;
-  margin: 1rem 0;
-  padding: 1rem;
-  font-weight: normal;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-weight: 500;
+  font-size: 2.6rem;
+}
+
+h2 {
+  font-size: 2rem;
 }
 
 a,
-.green {
+.terracotta {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  color: #E27D60;
   transition: 0.4s;
   padding: 3px;
+}
+
+.orange {
+  color: #E8A87C
 }
 
 @media (hover: hover) {
@@ -25,12 +36,11 @@ a,
 @media (min-width: 1024px) {
   body {
     display: flex;
-    place-items: center;
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    display: flex;
+    height: 100vh;
+    flex: 1;
   }
 }
