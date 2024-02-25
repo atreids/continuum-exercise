@@ -1,9 +1,19 @@
-
-
 <script setup lang="ts">
-  import { useStore } from 'vuex'
-  const { map, quakeData } = defineProps(['quakeData', 'map'])
-  console.log({ quakeData})
+  import { computed } from 'vue';
+  import { useStore, Actions } from '../store'
+
+  const store = useStore();
+
+  const quakeData = computed(() => store.state.quakeData)
+  const filter = computed(() => store.state.filter)
+  const map = computed(() => store.state.map)
+
+  const quakeList = computed(() => {
+    if(filter.value && quakeData.value) {
+      return quakeData.value.features.filter((feature) => feature.properties?.title.toLowerCase().includes(filter.value))
+    }
+    return quakeData.value ? quakeData.value.features : undefined;
+  })
 
   type HTMLElementEvent<T extends HTMLElement> = Event & {
     target: T
@@ -11,9 +21,9 @@
   }
 
   const enlargeQuake = (event: MouseEvent) => {
-    if(map){
+    if(map.value){
       const el = event.currentTarget as HTMLLIElement;
-      map.setFeatureState(
+      map.value.setFeatureState(
         { source: 'earthquakes-source', id: el.id},
         { hover: true}
       )
@@ -21,9 +31,9 @@
   }
 
   const resetQuake = (event: MouseEvent) => {
-    if(map){
+    if(map.value){
       const el = event.currentTarget as HTMLLIElement;
-      map.setFeatureState(
+      map.value.setFeatureState(
         { source: 'earthquakes-source', id: el.id},
         { hover: false}
       )
@@ -31,49 +41,37 @@
   }
 
   const zoomTo = (event: MouseEvent) => {
-    if(map){
+    if(map.value){
       const el = event.currentTarget as HTMLLIElement;
-      const coords = quakeData.features.find((quake) => quake.id === el.id).geometry.coordinates
-      map.panTo(coords)
+      const geo = quakeData.value?.features.find((quake) => quake.id === el.id)?.geometry
+      if(geo && geo.type === "Point"){
+        map.value.panTo([geo.coordinates[0], geo.coordinates[1]])
+      }
     }
   }
 
   const searchSubmit = (event: HTMLElementEvent<HTMLTextAreaElement>) => {
-    const search = event.currentTarget.value.toLowerCase()
-    const idsToFilter: string[] = quakeData.features.filter((quake) => !quake.properties.title.toLowerCase().includes(search)).map((q) => q.id)
-    if(idsToFilter.length > 0) {
-      const mapfilter = ['!', ['any', [
-          'any',
-          ...(idsToFilter).map((id) => ['in', `${id}`, ['get', 'id']])
-      ]]];
-      map.setFilter(
-      'earthquake-layer',
-      mapfilter
-    )
-    } else {
-      map.setFilter(
-        'earthquake-layer',
-        null
-      )
+    if(map.value) {
+      const filter = event.currentTarget.value.toLowerCase()
+      store.dispatch(Actions.APPLY_FILTER, { filter })
     }
   }
-
 </script>
 
 <template>
   <div class="sidebar">
     <input type="text" placeholder="Filter earthquakes" id="filter-input" @keyup="(e: any) => searchSubmit(e)">
     <div class="list">
-      <ul v-if="quakeData">
+      <ul>
         <li
-          v-for="quake in quakeData.features"
+          v-for="quake in quakeList"
           :key="quake.id"
           @mouseover="enlargeQuake"
           @mouseleave="resetQuake"
           @mouseup="zoomTo"
-          :id="quake.id"
+          :id="String(quake.id)"
         >
-          {{ quake.properties.title }}
+          {{ quake.properties?.title }}
         </li>
       </ul>
     </div>
@@ -107,6 +105,7 @@ input {
   padding: 0.5rem;
   border: 2px solid black;
   border-radius: 5px;
+  min-width: 30vw;
 }
 
 .list {

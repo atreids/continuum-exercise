@@ -1,31 +1,7 @@
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue';
-  import { useStore } from 'vuex'
-  import axios from 'axios'
   import TheMap from './components/TheMap.vue'
   import EarthquakeList from './components/EarthquakeList.vue'
   import "mapbox-gl/dist/mapbox-gl.css"
-
-  const store = useStore()
-  const quakeData = computed(() => store.state.quakeData)
-  const map = ref()
-
-  onMounted(async () => {
-    const { data } = await axios.get('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson')
-    const dataWithId = {
-      ...data,
-      features: data.features.map((feature) => {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            id: feature.id,
-          }
-        }
-      })
-    }
-    store.commit('setQuakeData', { quakeData: dataWithId })
-  })
 </script>
 
 <template>
@@ -35,8 +11,8 @@
   </header>
 
   <main>
-    <EarthquakeList :quake-data="quakeData" :map="map" v-if="map"/>
-    <TheMap :quake-data="quakeData" @map-ready="(mapInstance) => map = mapInstance"/>
+    <EarthquakeList />
+    <TheMap />
   </main>
 </template>
 
