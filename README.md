@@ -2,6 +2,10 @@
 
 Exercise for continuum industries to build an earthquake tracker using Vue3 and Mapbox.
 
+## Implementation Docs
+
+Docs here: [Implementation](./Implementation.md)
+
 ## Prerequisites
 
 - Node v20+
@@ -17,6 +21,8 @@ npm install
 ```sh
 npm run dev
 ```
+
+Should be accessible at `http://localhost:5173`
 
 ### Type-Check, Compile and Minify for Production
 
